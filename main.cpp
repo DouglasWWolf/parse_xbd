@@ -324,7 +324,7 @@ void execute(int argc, char** argv)
         }
 
         // Print the denormalized key-value pair
-        printf("%s%s  = \"%s\"\n", hierarchy().c_str(), xmlkey, xmlval);
+        printf("%s%s = \"%s\"\n", hierarchy().c_str(), xmlkey, xmlval);
     }
 
 }
