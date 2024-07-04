@@ -49,7 +49,7 @@ static void throwRuntime(const char* fmt, ...)
 //=============================================================================
 static void show(const char* ptr)
 {
-    char buffer[100];
+    char buffer[300];
 
     memcpy(buffer, ptr, sizeof(buffer)-1);
     buffer[sizeof(buffer)-1] = 0;
@@ -138,6 +138,19 @@ static const char* skip_first_brace(const char* ptr)
 //=============================================================================
 
 
+//=============================================================================
+// skip_comma() - This skips over a trailing comma (if it exists)
+//=============================================================================
+static const char* skip_comma(const char* p)
+{
+    p = skip_whitespace(p);
+    if (*p == ',')
+    {
+        p = skip_whitespace(p+1);
+    }
+    return p;
+}
+//=============================================================================
 
 
 //=============================================================================
@@ -178,7 +191,6 @@ static const char* fetch_token
         // We should never see a nul-terminator on the input
         if (c == 0) throwRuntime("unexpected end of JSON data");
        
-
         // If this is a quote mark and we need to strip it...
         if (is_quoted && strip_quotes && c == 34)
         {
@@ -239,6 +251,85 @@ static const char* get_json_key(const char* p, char* dest, int dest_size)
 }
 //=============================================================================
 
+//=============================================================================
+// extract_json_array - Write everything between [ and ] into *dest
+//=============================================================================
+static const char* extract_json_array(const char* p, char* dest, int dest_size)
+{
+    char token[5000], *tbuf = token;
+    int tbuf_size = sizeof(token);
+
+    int count = 0;
+
+    // This is where we will begin outputting data
+    char* out = dest;
+
+    // The output buffer starts empty
+    *dest = 0;
+
+    // Leave room for the '[]' on either end of the output
+    dest_size -= 2;
+
+    // Output the opening brace
+    *out++ = '[';
+
+    // Skip leading whitespace
+    p = skip_whitespace(p);
+
+    while (true)
+    {
+        // If we find an open-brace, don't attempt to extract this array
+        if (*p == OCB || *p == OSB)
+        {
+            *dest = 0;
+            return nullptr;
+        }
+
+        // If we hit the close-square brace, we're done
+        if (*p == CSB) break;
+
+        // If this isn't the first item, put ", " at the start of token
+        if (count)
+        {
+            token[0] = ',';
+            token[1] = ' ';
+            tbuf = token + 2;
+            tbuf_size = sizeof(token) - 2;
+        }
+
+        // Extract this token
+        p = fetch_token(p, tbuf, tbuf_size);
+
+        // Find out how long our stoken is
+        int token_length = strlen(token);
+
+        // If the token will fit into the buffer...
+        if (token_length <= dest_size)
+        {
+            // Append this token to the output
+            strcat(dest, token);
+
+            // We have that much room left in the output buffer
+            dest_size -= token_length;
+        }
+        
+        // Otherwise, no more tokens are allowed to be output
+        else dest_size = 0;
+
+        // If there's a trailing comma on the input, skip over it
+        p = skip_comma(p);
+
+        // Keep track of how many tokens we output
+        ++count;
+    }
+
+    // Close the brace in the output buffer
+    strcat(dest, "]");
+
+    // Hand the pointer to the remaining JSON data to the caller
+    return p + 1;
+}
+//=============================================================================
 
 
 //=============================================================================
@@ -247,6 +338,8 @@ static const char* get_json_key(const char* p, char* dest, int dest_size)
 //=============================================================================
 static const char* get_json_value(const char* p, char* dest, int dest_size)
 {
+    const char* eolist = nullptr;
+
     p = skip_whitespace(p);
     
     // If the next character isn't a colon, there's no value
@@ -258,6 +351,12 @@ static const char* get_json_value(const char* p, char* dest, int dest_size)
 
     // Skip over the colon and any whitespace
     p = skip_whitespace(p+1);
+
+    if (*p == OSB)
+    {
+        eolist = extract_json_array(p+1, dest, dest_size);
+        if (eolist) return eolist;
+    }
     
     // If the value was an open curly brace, we're done
     if (*p == OCB || *p == OSB)
@@ -269,21 +368,6 @@ static const char* get_json_value(const char* p, char* dest, int dest_size)
 
     // Fetch the token and hand the caller to the ptr to the next character
     return fetch_token(p, dest, dest_size);
-}
-//=============================================================================
-
-
-//=============================================================================
-// skip_comma() - This skips over a trailing comma (if it exists)
-//=============================================================================
-static const char* skip_comma(const char* p)
-{
-    p = skip_whitespace(p);
-    if (*p == ',')
-    {
-        p = skip_whitespace(p+1);
-    }
-    return p;
 }
 //=============================================================================
 

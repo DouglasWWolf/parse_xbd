@@ -11,7 +11,7 @@
 /*
     This program denormalizes a Xilinx Block Design file into key/value pairs.
 
-    This is not a full-featured XML parser... just enough to perform the task
+    This is not a full-featured JSON parser... just enough to perform the task
     at hand.
 
 */
@@ -37,7 +37,7 @@ void execute(int argc, char** argcv);
 
 
 //=============================================================================
-// main() - Denormalizes a simple XML file
+// main() - Denormalizes a simple JSON file
 //=============================================================================
 int main(int argc, char** argv)
 {
