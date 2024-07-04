@@ -332,13 +332,12 @@ vector<ulw_json::pair_t> ulw_json::Parser::parse(string filename)
         }
 
         // Stuff this key-value pair into the result vector
-        entry.key   = json_key;
+        entry.key   = m_hier.str() + json_key;
         entry.value = json_val;
         result.push_back(entry);
 
         // Print the denormalized key-value pair
         printf("%s%s = %s\n", m_hier.str().c_str(), json_key, json_val);
-
 
         // If the next character is a comma, skip it
         json_ptr = skip_comma(json_ptr);

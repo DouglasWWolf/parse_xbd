@@ -88,8 +88,10 @@ void execute(int argc, char** argv)
     // Parse the command line
     parse_command_line(argv);
 
+    // Parse the JSON file into denormalized key/value pairs
     auto v = JSON.parse(input_file);
 
+    // Print the key-value pairs
     for (auto& e : v)
     {
       printf("%s = %s\n", e.key.c_str(), e.value.c_str());
