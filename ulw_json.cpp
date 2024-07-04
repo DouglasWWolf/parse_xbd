@@ -230,7 +230,10 @@ static const char* get_json_key(const char* p, char* dest, int dest_size)
         p = fetch_token(p, dest, dest_size, true);
     }
     else
+    {
+        show(p);
         throwRuntime("malformed JSON");
+    }
 
     return p;
 }
@@ -270,6 +273,20 @@ static const char* get_json_value(const char* p, char* dest, int dest_size)
 //=============================================================================
 
 
+//=============================================================================
+// skip_comma() - This skips over a trailing comma (if it exists)
+//=============================================================================
+static const char* skip_comma(const char* p)
+{
+    p = skip_whitespace(p);
+    if (*p == ',')
+    {
+        p = skip_whitespace(p+1);
+    }
+    return p;
+}
+//=============================================================================
+
 
 
 //=============================================================================
@@ -300,9 +317,9 @@ vector<ulw_json::pair_t> ulw_json::Parser::parse(string filename)
         if (json_key[0] == CCB)
         {
             if (!m_hier.pop()) break;
+            json_ptr = skip_comma(json_ptr);
             continue;
         }
-
 
         // Fetch the value that goes with that key
         json_ptr = get_json_value(json_ptr, json_val, MAX_TOKEN);
@@ -323,15 +340,8 @@ vector<ulw_json::pair_t> ulw_json::Parser::parse(string filename)
         printf("%s%s = %s\n", m_hier.str().c_str(), json_key, json_val);
 
 
-        // If the next character is a comma, go get another key-value pair
-        if (*json_ptr == ',')
-        {
-            ++json_ptr;
-            continue;
-        }
-
-
-        exit(1);
+        // If the next character is a comma, skip it
+        json_ptr = skip_comma(json_ptr);
     }
     
     return result;
