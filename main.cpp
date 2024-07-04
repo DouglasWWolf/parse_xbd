@@ -24,6 +24,11 @@
 #include <string>
 #include <vector>
 
+
+#include "ulw_json.h"
+
+ulw_json::Parser JSON;
+
 using std::string;
 using std::vector;
 
@@ -286,11 +291,20 @@ void parse_command_line(char** argv)
 //=============================================================================
 void execute(int argc, char** argv)
 {
+    // Parse the command line
+    parse_command_line(argv);
+
+
+    JSON.parse(input_file);
+    exit(1);
+
+    
+
+
     char* xmlkey = new char[10000000];
     char* xmlval = new char[10000000];
 
-    // Parse the command line
-    parse_command_line(argv);
+
 
     // Read in the XML file
     const char* xmlptr = read_file(input_file);
