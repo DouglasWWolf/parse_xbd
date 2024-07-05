@@ -15,15 +15,14 @@ namespace ulw_json
     struct pair_t {std::string key, value;};
 }
 
-
+//-----------------------------------------------------------------------------
+// This class is used by the JSON parser to keep track of a stack of hierarchy
+// levels
+//-----------------------------------------------------------------------------
 class ulw_json::JSON_heir
 {
 public:
-    
-    bool empty()
-    {
-        return m_hierarchy.empty();
-    }
+
 
     void push(const std::string s)
     {
@@ -58,9 +57,13 @@ protected:
     std::vector<std::string> m_hiervec;
 
 };
+//-----------------------------------------------------------------------------
 
 
 
+//-----------------------------------------------------------------------------
+// ultra-light-weight JSON parser
+//-----------------------------------------------------------------------------
 class ulw_json::Parser
 {
 public:
@@ -73,3 +76,4 @@ protected:
     // This is a stack of strings that describe the JSON hierarchy
     JSON_heir m_hier;
 };
+//-----------------------------------------------------------------------------

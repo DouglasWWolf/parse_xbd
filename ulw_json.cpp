@@ -251,8 +251,9 @@ static const char* get_json_key(const char* p, char* dest, int dest_size)
 }
 //=============================================================================
 
+
 //=============================================================================
-// extract_json_array - Write everything between [ and ] into *dest
+// extract_json_array - Write all tokens between [ and ] into *dest
 //=============================================================================
 static const char* extract_json_array(const char* p, char* dest, int dest_size)
 {
