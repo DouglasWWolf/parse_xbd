@@ -352,6 +352,8 @@ static const char* get_json_value(const char* p, char* dest, int dest_size)
     // Skip over the colon and any whitespace
     p = skip_whitespace(p+1);
 
+    // If this is an open square brace, check to see if the array can
+    // be fetched.  If it can, use the array as our JSON value
     if (*p == OSB)
     {
         eolist = extract_json_array(p+1, dest, dest_size);
@@ -366,7 +368,7 @@ static const char* get_json_value(const char* p, char* dest, int dest_size)
         return p+1;
     }
 
-    // Fetch the token and hand the caller to the ptr to the next character
+    // Fetch the token and hand the caller the ptr to the next character
     return fetch_token(p, dest, dest_size);
 }
 //=============================================================================
@@ -420,8 +422,10 @@ vector<ulw_json::pair_t> ulw_json::Parser::parse(string filename)
         entry.value = json_val;
         result.push_back(entry);
 
-        // Print the denormalized key-value pair
+        // When debugging, print the denormalized key-value pair
+        #if 0
         printf("%s%s = %s\n", m_hier.str().c_str(), json_key, json_val);
+        #endif
 
         // If the next character is a comma, skip it
         json_ptr = skip_comma(json_ptr);
